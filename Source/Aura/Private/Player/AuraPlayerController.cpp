@@ -4,10 +4,76 @@
 #include "Player/AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Interaction/EnemyInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+}
+
+void AAuraPlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+	
+	CursorTrace();
+}
+
+void AAuraPlayerController::CursorTrace()
+{
+	FHitResult CursorHit;
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	if (!CursorHit.bBlockingHit) return;
+	
+	LastActor = ThisActor;
+	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
+	
+	/*
+	 *鼠标的移动轨迹有下面几种情况
+	 *  1.Lastactor = null && ThisActor is null;
+	 *      - 什么都不做
+	 *  2. LastActor = null && ThisActor 有效
+	 *		- Highlight ThisActor
+	 *  3. LastActor is valid && ThisActor is null;
+	 *		- UnHighlight LastActor;
+	 *	4. Both actors are valid, but LastActor != ThisActor;
+	 *		-UnHilight LastActor ,and Highlight ThisActor
+	 *  5. Both actors are valid, and are same actor;
+	 *		- Do nothing
+	 */
+	
+	if (LastActor == nullptr)
+	{
+		if (ThisActor != nullptr)
+		{
+			//Case 2
+			ThisActor->HighlightActor();
+		}
+		else
+		{
+			//Case 1 do nothing
+		}
+	}
+	else //LastActor is valid
+	{
+		if (ThisActor == nullptr)
+		{
+			//Case 3
+			LastActor->UnHighlightActor();
+		}
+		else
+		{
+			if (ThisActor != LastActor)
+			{
+				//case 4
+				LastActor->UnHighlightActor();
+				ThisActor->HighlightActor();
+			}
+			else
+			{
+				//case 5 - do nothing
+			}
+		}
+	}
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -53,3 +119,5 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 	}
 	
 }
+
+
