@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "GameFramework/Actor.h"
 #include "AuraEffectActor.generated.h"
 
@@ -24,6 +25,45 @@ enum class EEffectRemovalPolicy
 	DoNotRemove
 };
 
+// 用于 Instant 和 Duration 效果的配置（无移除策略）
+USTRUCT(BlueprintType)
+struct FEffectWithConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> GameplayEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EEffectApplicationPolicy ApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
+};
+
+USTRUCT(BlueprintType)
+struct FInfiniteEffectWithConfig
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> GameplayEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EEffectApplicationPolicy ApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	EEffectRemovalPolicy InfiniteEffectRemovalPolicy = EEffectRemovalPolicy::RemoveOnEndOverlap;
+};
+
+//用于ActiveEffectHandles的value
+USTRUCT(BlueprintType)
+struct FActiveEffectHandleList
+{
+	GENERATED_BODY()
+	// 将数组放在结构体内部
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FActiveGameplayEffectHandle> Handles;
+};
+
+
 UCLASS()
 class AURA_API AAuraEffectActor : public AActor
 {
@@ -39,6 +79,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass);
 	
+	void ApplayInfiniteEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass,EEffectRemovalPolicy InfiniteEffectRemovalPolicy);
+	
 	UFUNCTION(BlueprintCallable)
 	void OnOverlap(AActor* TargetActor);
 	
@@ -49,23 +91,28 @@ protected:
 	bool bDestroyOnEffectRemoval = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass;
+	TArray<FEffectWithConfig> InstantGameplayEffectList;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	EEffectApplicationPolicy InstantEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
+	TArray<FEffectWithConfig> DurationGameplayEffectList;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass;
+	TArray<FInfiniteEffectWithConfig> InfiniteGameplayEffectList;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	EEffectApplicationPolicy DurationEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass;
+	UPROPERTY()
+	TMap<TObjectPtr<UAbilitySystemComponent>, FActiveEffectHandleList> ActiveEffectHandles;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	EEffectApplicationPolicy InfiniteEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	EEffectRemovalPolicy InfiniteEffectRemovalPolicy = EEffectRemovalPolicy::RemoveOnEndOverlap;
+	// Helper function for adding a handle:
+	void AddActiveEffectHandle(UAbilitySystemComponent* AbilitySystem, const FActiveGameplayEffectHandle& Handle)
+	{
+		if (!AbilitySystem)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AddActiveEffectHandle: AbilitySystem is null!"));
+			return;
+		}
+		// Get or add the struct in the map
+		FActiveEffectHandleList& HandleList = ActiveEffectHandles.FindOrAdd(AbilitySystem);
+		HandleList.Handles.Add(Handle);
+	}
 };
