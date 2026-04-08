@@ -28,7 +28,7 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGam
 	check(GameplayEffectClass);
 	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(this);
-	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, 1.f, EffectContextHandle);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, ActorLevel, EffectContextHandle);
 	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 }
 
@@ -115,5 +115,17 @@ void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 			}
 		}
 	}
+}
+
+void AAuraEffectActor::AddActiveEffectHandle(UAbilitySystemComponent* AbilitySystem, const FActiveGameplayEffectHandle& Handle)
+{
+	if (!AbilitySystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AddActiveEffectHandle: AbilitySystem is null!"));
+		return;
+	}
+	// Get or add the struct in the map
+	FActiveEffectHandleList& HandleList = ActiveEffectHandles.FindOrAdd(AbilitySystem);
+	HandleList.Handles.Add(Handle);
 }
 

@@ -102,17 +102,10 @@ protected:
 	
 	UPROPERTY()
 	TMap<TObjectPtr<UAbilitySystemComponent>, FActiveEffectHandleList> ActiveEffectHandles;
-	
 	// Helper function for adding a handle:
-	void AddActiveEffectHandle(UAbilitySystemComponent* AbilitySystem, const FActiveGameplayEffectHandle& Handle)
-	{
-		if (!AbilitySystem)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AddActiveEffectHandle: AbilitySystem is null!"));
-			return;
-		}
-		// Get or add the struct in the map
-		FActiveEffectHandleList& HandleList = ActiveEffectHandles.FindOrAdd(AbilitySystem);
-		HandleList.Handles.Add(Handle);
-	}
+	void AddActiveEffectHandle(UAbilitySystemComponent* AbilitySystem, const FActiveGameplayEffectHandle& Handle);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	float ActorLevel = 1.f;
+
 };
