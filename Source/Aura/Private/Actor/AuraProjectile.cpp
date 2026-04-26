@@ -9,6 +9,7 @@
 AAuraProjectile::AAuraProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	SetRootComponent(Sphere);
@@ -18,8 +19,8 @@ AAuraProjectile::AAuraProjectile()
 	Sphere->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
-	ProjectileMovement->InitialSpeed = 550.0f;
-	ProjectileMovement->MaxSpeed = 550.0f;
+	ProjectileMovement->InitialSpeed = 800.0f;
+	ProjectileMovement->MaxSpeed = 800.0f;
 	ProjectileMovement->ProjectileGravityScale = 0.0f;
 }
 
