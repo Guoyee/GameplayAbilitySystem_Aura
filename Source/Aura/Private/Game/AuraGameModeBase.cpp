@@ -10,4 +10,6 @@ void AAuraGameModeBase::BeginPlay()
 	{
 		World->GetWorldSettings()->SetTimeDilation(1.0f);
 	}
+	
+	check(CharacterClassInfo);
 }

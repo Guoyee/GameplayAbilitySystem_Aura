@@ -25,19 +25,25 @@ protected:
 	void BeginProjectileSpawn();
 	
 	UFUNCTION(BlueprintCallable, Category = "Ability")
-	void FinishProjectileSpawn();
+	void FinishProjectileSpawn(const FVector& ProjectileTargetLocation);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly);
 	TSubclassOf<AAuraProjectile> ProjectileClass;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> DamageEffectClass;
+	
 private:
 	// 存储已经做了Deferred Spawn，但尚未Finish的弹体
 	UPROPERTY()
-	AActor* DeferredProjectile;
+	AAuraProjectile* DeferredProjectile;
  
 	// 记录SpawnTransform
 	FTransform PendingSpawnTransform;
 	
 	//缓存接口变量用于获取socket位置
 	ICombatInterface* CombatInterface;
+	
+
 
 };

@@ -68,6 +68,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		bTargeting = ThisActor ? true : false;
 		bAutoRunning = false;
 	}
+	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB)) bAutoRunning = false;
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)

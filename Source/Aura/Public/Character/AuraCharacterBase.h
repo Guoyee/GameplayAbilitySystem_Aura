@@ -41,6 +41,10 @@ protected:
 	
 	virtual void InitAbilityActorInfo();
 	
+	/*
+	 * 1.对于玩家操控角色，这些值在角色蓝图（BP_AuraCharacter）的details面板中配置
+	 * 2.对于怪物，通过怪物的 ECharacterClass 类别来匹配对应的DefaultPrimaryAttributes
+	 */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
 	
