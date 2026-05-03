@@ -40,7 +40,15 @@ public:
 	FGameplayTag InputTag_3;
     FGameplayTag InputTag_4;
 	
+	FGameplayTag Damage;
+	
+	FGameplayTag Effects_HitReact;
 	
 private:
 	static FAuraGameplayTags SingletonGameplayTags;
+
+	// [Claude] 禁止拷贝，保护单例不被复制
+	FAuraGameplayTags() = default;
+	FAuraGameplayTags(const FAuraGameplayTags&) = delete;
+	FAuraGameplayTags& operator=(const FAuraGameplayTags&) = delete;
 };

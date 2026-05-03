@@ -7,6 +7,7 @@
 #include "AuraPlayerController.generated.h"
 
 
+class UDamageTextComponent;
 class USplineComponent;
 class UAuraAbilitySystemComponent;
 struct FGameplayTag;
@@ -27,6 +28,11 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 	virtual void PlayerTick(float DeltaTime) override;
+	
+	//播放伤害数字只在本地（Controller对应的客户端）进行，由Sever调用RPC，或者本地直接运行
+	//需要传入收到伤害的Character的指针，damage widget附着在该对象上
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(ACharacter* TargetCharacter, float DamageAmount);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -70,4 +76,7 @@ private:
 	TObjectPtr<USplineComponent> Spline;
 	
 	void AutoRun();
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
 };
