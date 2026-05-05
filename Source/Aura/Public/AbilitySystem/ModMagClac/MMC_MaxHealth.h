@@ -12,13 +12,13 @@
 UCLASS()
 class AURA_API UMMC_MaxHealth : public UGameplayModMagnitudeCalculation
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	UMMC_MaxHealth();
-	
-	virtual float CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const override;
-	
+    UMMC_MaxHealth();
+    
+    virtual float CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const override;
+    
 private:
-	
-	FGameplayEffectAttributeCaptureDefinition VigorDef;
+    
+    FGameplayEffectAttributeCaptureDefinition VigorDef;
 };

@@ -1,0 +1,13 @@
+root = true
+
+[*.{h,cpp}]
+indent_style = space
+indent_size = 4
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+[*.{uproject,uplugin}]
+indent_style = space
+indent_size = 4
