@@ -17,6 +17,9 @@ AAuraCharacter::AAuraCharacter()
     GetCharacterMovement()->bConstrainToPlane = true;
     GetCharacterMovement()->bSnapToPlaneAtStart = true;
     
+    // 专用服务器上也更新动画姿态，保证技能弹体生成位置正确
+    GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+
     //角色不跟随摄像机旋转
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;

@@ -100,6 +100,22 @@ public:
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ArmorPenetration, Category = "Secondary Attributes")
     FGameplayAttributeData ArmorPenetration;
     ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ArmorPenetration);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistanceFire, Category = "Secondary Attributes")
+    FGameplayAttributeData ResistanceFire;
+    ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ResistanceFire);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistanceLightning, Category = "Secondary Attributes")
+    FGameplayAttributeData ResistanceLightning;
+    ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ResistanceLightning);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistanceArcane, Category = "Secondary Attributes")
+    FGameplayAttributeData ResistanceArcane;
+    ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ResistanceArcane);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistancePhysical, Category = "Secondary Attributes")
+    FGameplayAttributeData ResistancePhysical;
+    ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ResistancePhysical);
     
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_BlockChance, Category = "Secondary Attributes")
     FGameplayAttributeData BlockChance;
@@ -172,6 +188,18 @@ public:
 
     UFUNCTION()
     void OnRep_ArmorPenetration(const FGameplayAttributeData& OldArmorPenetration) const;
+
+    UFUNCTION()
+    void OnRep_ResistanceFire(const FGameplayAttributeData& OldResistanceFire) const;
+
+    UFUNCTION()
+    void OnRep_ResistanceLightning(const FGameplayAttributeData& OldResistanceLightning) const;
+
+    UFUNCTION()
+    void OnRep_ResistanceArcane(const FGameplayAttributeData& OldResistanceArcane) const;
+
+    UFUNCTION()
+    void OnRep_ResistancePhysical(const FGameplayAttributeData& OldResistancePhysical) const;
     
     UFUNCTION()
     void OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const;
@@ -208,7 +236,7 @@ public:
 private:
     
     void SetAffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
-    void ShowFloatingText(FEffectProperties& Props, float Damage) const;
+    void ShowFloatingText(FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalHit) const;
     
     //UGameplayEffectExecutionCalculation
 };

@@ -32,7 +32,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
     AutoRun();
 }
 
-void AAuraPlayerController::ShowDamageNumber_Implementation(ACharacter* TargetCharacter, float DamageAmount)
+void AAuraPlayerController::ShowDamageNumber_Implementation(ACharacter* TargetCharacter, float DamageAmount, bool bBlockedHit, bool bCriticalHit)
 {
     if (IsValid(TargetCharacter) && DamageTextComponentClass)
     {
@@ -41,7 +41,8 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(ACharacter* TargetCh
         DamageText->AttachToComponent(TargetCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
         // [Claude] 随机偏移避免多次伤害跳字重叠
         DamageText->SetRelativeLocation(FVector(FMath::RandRange(-30.f, 30.f), 0.f, FMath::RandRange(0.f, 40.f)));
-        DamageText->SetDamageText(DamageAmount);
+
+        DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
     }
 }
 

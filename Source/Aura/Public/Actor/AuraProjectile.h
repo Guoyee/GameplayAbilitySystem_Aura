@@ -28,15 +28,17 @@ protected:
     virtual void BeginPlay() override;
     virtual void Destroyed() override;
     
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastImpactEffect(const FVector& ImpactLocation);
+
     UFUNCTION()
     void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherOverlappedComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 private:
     
     UPROPERTY(EditDefaultsOnly)
-    float LifeSpan = 15.f;
-    
+    float LifeSpan = 3.f;
+
     bool bClientHitEffect = false;
-    bool bServerDestroyed = false;
     
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USphereComponent> Sphere;

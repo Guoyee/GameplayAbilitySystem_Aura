@@ -30,10 +30,10 @@ void UAuraProjectileSpell::BeginProjectileSpawn()
         
         check(ProjectileClass);
         DeferredProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
-            ProjectileClass, 
-            PendingSpawnTransform, 
-            GetOwningActorFromActorInfo(), 
-            Cast<APawn>(GetOwningActorFromActorInfo()), 
+            ProjectileClass,
+            PendingSpawnTransform,
+            GetAvatarActorFromActorInfo(),
+            Cast<APawn>(GetAvatarActorFromActorInfo()),
             ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
         
         //TODO: 给弹体添加造成伤害的 Ganmeplay Effect
@@ -51,9 +51,15 @@ void UAuraProjectileSpell::BeginProjectileSpawn()
         
         const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
         
-        const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
+        
+        
+        for (auto& Pair:DamageTypes)
+        {
+            const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+            UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
+        }
+        
         //GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, FString::Printf(TEXT("Fire Bolt Damage: %f"), ScaledDamage));
-        UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, FAuraGameplayTags::Get().Damage, ScaledDamage);
         DeferredProjectile->DamageEffectSpecHandle = SpecHandle;
     }
 }

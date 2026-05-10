@@ -4,6 +4,7 @@
 #include "AbilitySystem/ExecCalc/ExecCalc_Damage.h"
 
 #include "AbilitySystemComponent.h"
+#include "AuraAbilityTypes.h"
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 
@@ -17,6 +18,11 @@ struct AuraDamageStatics
     DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitDamage);
     DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitResistance);
 
+    DECLARE_ATTRIBUTE_CAPTUREDEF(ResistanceFire);
+    DECLARE_ATTRIBUTE_CAPTUREDEF(ResistanceLightning);
+    DECLARE_ATTRIBUTE_CAPTUREDEF(ResistanceArcane);
+    DECLARE_ATTRIBUTE_CAPTUREDEF(ResistancePhysical);
+
     AuraDamageStatics()
     {
         //设置ANameDef的值
@@ -26,6 +32,27 @@ struct AuraDamageStatics
         DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, CriticalHitChance, Source, false);
         DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, CriticalHitDamage, Source, false);
         DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, CriticalHitResistance, Target, false);
+
+        DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, ResistanceFire, Target, false);
+        DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, ResistanceLightning, Target, false);
+        DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, ResistanceArcane, Target, false);
+        DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, ResistancePhysical, Target, false);
+    }
+
+    // Tag → CaptureDefinition 延迟初始化（Tag 在 AssetManager 启动后才就绪）
+    mutable TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition> ResistanceDefMap;
+
+    const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& GetResistanceDefMap() const
+    {
+        if (ResistanceDefMap.IsEmpty())
+        {
+            const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
+            ResistanceDefMap.Add(Tags.Attributes_Resistance_Fire, ResistanceFireDef);
+            ResistanceDefMap.Add(Tags.Attributes_Resistance_Lightning, ResistanceLightningDef);
+            ResistanceDefMap.Add(Tags.Attributes_Resistance_Arcane, ResistanceArcaneDef);
+            ResistanceDefMap.Add(Tags.Attributes_Resistance_Physical, ResistancePhysicalDef);
+        }
+        return ResistanceDefMap;
     }
 };
 
@@ -49,6 +76,10 @@ UExecCalc_Damage::UExecCalc_Damage()
     RelevantAttributesToCapture.Add(DamageStatics().CriticalHitChanceDef);
     RelevantAttributesToCapture.Add(DamageStatics().CriticalHitDamageDef);
     RelevantAttributesToCapture.Add(DamageStatics().CriticalHitResistanceDef);
+    RelevantAttributesToCapture.Add(DamageStatics().ResistanceFireDef);
+    RelevantAttributesToCapture.Add(DamageStatics().ResistanceLightningDef);
+    RelevantAttributesToCapture.Add(DamageStatics().ResistanceArcaneDef);
+    RelevantAttributesToCapture.Add(DamageStatics().ResistancePhysicalDef);
 }
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
@@ -68,9 +99,25 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     EvaluateParameters.TargetTags = TargetTags;
     
     /*
-     *根据捕获的值计算Damage
-    */
-    float Damage = Spec.GetSetByCallerMagnitude(FAuraGameplayTags::Get().Damage);
+     * 根据捕获的值计算Damage，应用对应元素抗性
+     */
+    float Damage = 0;
+
+    for (const auto& [DamageTypeTag, ResistanceTag] : FAuraGameplayTags::Get().DamageTypeToResistances)
+    {
+        const float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag, false, 0.f);
+        if (DamageTypeValue <= 0.f) continue;
+
+        // 查找对应的 CaptureDef
+        const FGameplayEffectAttributeCaptureDefinition* Def = DamageStatics().GetResistanceDefMap().Find(ResistanceTag);
+        checkf(Def, TEXT("DamageTypeToResistances 映射缺失: Tag [%s] 在 ResistanceDefMap 中未找到对应的 CaptureDef，请在 GetResistanceDefMap() 中添加"), *ResistanceTag.ToString());
+
+        float Resistance = 0.f;
+        ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(*Def, EvaluateParameters, Resistance);
+        Resistance = FMath::Max(Resistance, 0.f);
+        Damage += DamageTypeValue * (100.f - Resistance) / 100.f;
+    }
+    
     
     //Capture BlockCance on Target, and determine if there was a successful Block
     //计算格挡，被格挡伤害减半
@@ -78,7 +125,12 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     float TargetBlockChance = 0.f;
     ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().BlockChanceDef, EvaluateParameters, TargetBlockChance);
     TargetBlockChance = FMath::Max(TargetBlockChance, 0.f);
-    bool bBlocked = FMath::RandRange(0, 99) < TargetBlockChance;
+    const bool bBlocked = FMath::RandRange(0, 99) < TargetBlockChance;
+    
+    FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+    FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
+    AuraContext->SetIsBlockedHit(bBlocked);
+    
     Damage = bBlocked ? Damage/2.f : Damage;
     
     
@@ -90,9 +142,9 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     float SourceArmorPenetration = 0.f;
     ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().ArmorPenetrationDef,EvaluateParameters, SourceArmorPenetration);
     SourceArmorPenetration = FMath::Max(SourceArmorPenetration, 0.f);
-    const float EffectiveArmor = TargetArmor * (100.f - SourceArmorPenetration)/100.f;
+    const float EffectiveArmor = TargetArmor - SourceArmorPenetration;
     
-    Damage *= 100.f / (EffectiveArmor + 100.f);
+    Damage *= EffectiveArmor >= 0 ? 100.f / (EffectiveArmor + 100.f) : 2 - 100/(100 - EffectiveArmor);
     
     // [Claude] 计算暴击：暴击几率 - 目标暴击抗性 = 有效暴击几率，暴击伤害系数 = 1.5 + CritDamage/100
     float SourceCriticalHitChance = 0.f;
@@ -109,9 +161,12 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
     const float EffectiveCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance;
     bool bCriticalHit = FMath::RandRange(0, 99) < EffectiveCriticalHitChance;
+    AuraContext->SetIsCriticalHit(bCriticalHit);
+    
     Damage = bCriticalHit ? Damage * (1.5f + SourceCriticalHitDamage / 100.f) : Damage;
 
-    
+    //如果Damage为负，置0
+    Damage = FMath::Max(Damage, 0.f);
     
     //应用计算结果
     const FGameplayModifierEvaluatedData EvaluationData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);

@@ -20,6 +20,4 @@ public:
     //该技能的默认InputTag(默认键位), 在蓝图的details中设置 
     FGameplayTag StartupInputTag;
     
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
-    FScalableFloat Damage;
 };

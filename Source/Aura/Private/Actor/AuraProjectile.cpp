@@ -23,6 +23,7 @@ AAuraProjectile::AAuraProjectile()
     Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
     Sphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
     Sphere->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
+    Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
     
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
     ProjectileMovement->InitialSpeed = 800.0f;
@@ -41,35 +42,36 @@ void AAuraProjectile::BeginPlay()
 
 void AAuraProjectile::Destroyed()
 {
-    //如果服务器摧毁该Projectile时，客户端还没有执行OnSphereOverlap，那么将在这里执行命中动画和音效
-    if ((!bClientHitEffect && !HasAuthority()) || !bServerDestroyed)
-    {
-        UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-        UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-    }
     Super::Destroyed();
+}
+
+void AAuraProjectile::MulticastImpactEffect_Implementation(const FVector& ImpactLocation)
+{
+    if (!HasAuthority() && bClientHitEffect) return;
+    bClientHitEffect = true;
+
+    UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, ImpactLocation, FRotator::ZeroRotator);
+    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, ImpactLocation);
 }
 
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherOverlappedComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-    
+    if (OtherActor == GetOwner() || OtherActor == GetInstigator()) return;
+
     if (HasAuthority())
     {
-        //应用伤害GE
         if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
         {
             TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
         }
-        
-        
+
+        MulticastImpactEffect(GetActorLocation());
         Destroy();
-        bServerDestroyed = true;
-    }else
+    }
+    else
     {
-        bClientHitEffect = true;
+        MulticastImpactEffect(GetActorLocation());
     }
 }
 

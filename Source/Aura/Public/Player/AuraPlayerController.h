@@ -32,7 +32,7 @@ public:
     //播放伤害数字只在本地（Controller对应的客户端）进行，由Sever调用RPC，或者本地直接运行
     //需要传入收到伤害的Character的指针，damage widget附着在该对象上
     UFUNCTION(Client, Reliable)
-    void ShowDamageNumber(ACharacter* TargetCharacter, float DamageAmount);
+    void ShowDamageNumber(ACharacter* TargetCharacter, float DamageAmount, bool bBlockedHit, bool bCriticalHit);
     
 protected:
     virtual void BeginPlay() override;
