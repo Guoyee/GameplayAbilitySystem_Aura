@@ -84,6 +84,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
         FName("Attributes.Secondary.MaxMana"),
         FString("Maximum Mana amount")
     );
+
+    SingletonGameplayTags.Attributes_Secondary_AttackSpeed = UGameplayTagsManager::Get().AddNativeGameplayTag(
+        FName("Attributes.Secondary.AttackSpeed"),
+        FString("Attack speed multiplier, 1.0 = default")
+    );
     
     /* 
     * Input Tags
@@ -195,5 +200,34 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
     SingletonGameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
         FName("Effects.HitReact"),
         FString("HitReact")
+    );
+
+    /*
+    * Ability Tags
+    */
+    SingletonGameplayTags.Ability_Attack_Ranged = UGameplayTagsManager::Get().AddNativeGameplayTag(
+        FName("Ability.Attack.Ranged"),
+        FString("Ranged basic attack ability")
+    );
+
+    SingletonGameplayTags.Ability_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(
+        FName("Ability.Attack.Melee"),
+        FString("Melee basic attack ability")
+    );
+
+    /*
+    * Cooldown Tags
+    */
+    SingletonGameplayTags.Cooldown_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
+        FName("Cooldown.Attack"),
+        FString("Cooldown for basic attack")
+    );
+
+    /*
+    * Event Tags
+    */
+    SingletonGameplayTags.Event_Montage_SpawnProjectile = UGameplayTagsManager::Get().AddNativeGameplayTag(
+        FName("Event.Montage.SpawnProjectile"),
+        FString("AnimNotify event to spawn projectile during montage")
     );
 }

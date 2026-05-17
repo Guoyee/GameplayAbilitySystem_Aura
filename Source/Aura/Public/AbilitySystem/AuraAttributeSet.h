@@ -140,7 +140,11 @@ public:
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ManaRegeneration, Category = "Secondary Attributes")
     FGameplayAttributeData ManaRegeneration;
     ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ManaRegeneration);
-        
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AttackSpeed, Category = "Secondary Attributes")
+    FGameplayAttributeData AttackSpeed;
+    ATTRIBUTE_ACCESSORS(UAuraAttributeSet, AttackSpeed);
+
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Vital Attributes")
     FGameplayAttributeData MaxHealth;
     ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxHealth);
@@ -218,7 +222,10 @@ public:
     
     UFUNCTION()
     void OnRep_ManaRegeneration(const FGameplayAttributeData& OldManaRegeneration) const;
-    
+
+    UFUNCTION()
+    void OnRep_AttackSpeed(const FGameplayAttributeData& OldAttackSpeed) const;
+
     UFUNCTION()
     void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;
     

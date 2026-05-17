@@ -32,6 +32,7 @@ public:
     FGameplayTag Attributes_Secondary_ManaRegeneration;
     FGameplayTag Attributes_Secondary_MaxHealth;
     FGameplayTag Attributes_Secondary_MaxMana;
+    FGameplayTag Attributes_Secondary_AttackSpeed;
     
     FGameplayTag InputTag_LMB;
     FGameplayTag InputTag_RMB;
@@ -54,6 +55,11 @@ public:
     FGameplayTag Attributes_Resistance_Physical;
 
     FGameplayTag Effects_HitReact;
+
+    FGameplayTag Ability_Attack_Ranged;
+    FGameplayTag Ability_Attack_Melee;
+    FGameplayTag Cooldown_Attack;
+    FGameplayTag Event_Montage_SpawnProjectile;
     
 private:
     static FAuraGameplayTags SingletonGameplayTags;

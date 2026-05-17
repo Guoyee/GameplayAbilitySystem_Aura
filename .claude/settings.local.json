@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"D:/Program Files/Epic Games/UE_5.3/Engine/Build/BatchFiles/GenerateProjectFiles.bat\" -Project=\"D:/UE5/RiftTrial/RiftTrial.uproject\" -Game -Engine)",
+      "Bash(cmd.exe /c '\"D:\\\\Program Files\\\\Epic Games\\\\UE_5.3\\\\Engine\\\\Build\\\\BatchFiles\\\\GenerateProjectFiles.bat\" -Project=\"D:\\\\UE5\\\\RiftTrial\\\\RiftTrial.uproject\" -Game -Engine')",
+      "Bash(\"/d/Program Files/Epic Games/UE_5.3/Engine/Build/BatchFiles/GenerateProjectFiles.bat\" -Project=\"D:/UE5/RiftTrial/RiftTrial.uproject\" -Game -Engine)",
+      "Bash(cmd.exe /c \"D:\\\\Program Files\\\\Epic Games\\\\UE_5.3\\\\Engine\\\\Build\\\\BatchFiles\\\\Build.bat\" RiftTrialEditor Win64 Development \"-Project=D:\\\\UE5\\\\RiftTrial\\\\RiftTrial.uproject\" -WaitMutex)",
+      "Bash(powershell.exe -Command \"& 'D:\\\\Program Files\\\\Epic Games\\\\UE_5.3\\\\Engine\\\\Build\\\\BatchFiles\\\\GenerateProjectFiles.bat' -Project='D:\\\\UE5\\\\RiftTrial\\\\RiftTrial.uproject' -Game -Engine\")",
+      "Read(//d/Program Files/Epic Games/UE_5.3/Engine/Build/BatchFiles/**)",
+      "Read(//d/Program Files/Epic Games/**)",
+      "Bash(reg query *)",
+      "Bash(ls *)",
+      "Bash(\"D:\\\\\\\\Program Files\\\\\\\\Epic Games\\\\\\\\UE_5.3\\\\\\\\Engine\\\\\\\\Build\\\\\\\\BatchFiles\\\\\\\\Build.bat\" RiftTrialEditor Win64 Development \"-Project=D:\\\\\\\\UE5\\\\\\\\RiftTrial\\\\\\\\RiftTrial.uproject\" -WaitMutex)"
+    ]
+  }
+}
